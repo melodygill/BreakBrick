@@ -1,0 +1,56 @@
+/*
+For use with my Google Sheets level maker
+Highlight blocks, then run this script in Apps Script (script.google.com)
+It will generate a text representation of the blocks that I can copy into level text files.
+
+In the spreadsheet: cells w/ background color other than white are blocks
+Content of "block" cells is the value of the block
+*/
+
+//Given a cell (of type range), return a string representation of the cell to be used in Break Brick
+//Potential example: C2 --> 1 -11 15
+function formatCell(cell) {
+  var yConstant = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0].getRange('A2').getDisplayValue();
+  //console.log(yConstant);
+  yConstant = parseInt(yConstant) - 2;
+
+  var col = (cell.getColumn() - 2).toString();
+  var row = (cell.getRow() + yConstant).toString();
+  var value = cell.getDisplayValue();
+
+  //Return "col row value"; value is the contents of the cell
+  return (col + " " + row + " " + value);
+}
+
+//Checks each cell in the active range to see if there is a block indicated
+//Blocks are indicated by background color other than white (#ffffff)
+//If the cell indicates a block, then add the cell's string representation to output string
+function checkCells() {
+  var letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'];
+  var output = "";
+
+  //Loop through each cell in active range
+  var range = SpreadsheetApp.getActiveRange();
+  //var numCols = range.getLastColumn() - range.getColumn() + 1;
+  //var numRows = range.getLastRow() - range.getRow() + 1;
+
+  for (var j = range.getRow(); j <= range.getLastRow(); j++) {
+    for (var i = range.getColumn(); i <= range.getLastColumn(); i++) {
+      var cellPos = letters[i-1] + j.toString();
+      //Assuming we are looking at the first sheet in the spreadsheet
+      var cell = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0].getRange(cellPos);
+
+      //Check whether cell indicates a block
+      if (cell.getBackground() != "#ffffff") {
+        output = output + formatCell(cell) + "\n";
+      }
+    }
+  }
+  console.log(output);
+}
+
+//Used for debugging. Run either this or checkCells() directly
+//Highlight blocks in spreadsheet that I want to convert to text representation
+function main() {
+  checkCells();
+}
